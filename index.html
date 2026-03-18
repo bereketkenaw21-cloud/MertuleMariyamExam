@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mertule Mariyam Offline Exam</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+    <section id="welcome-page" class="screen active">
+        <h1 class="slideshow">እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የብሔራዊ ፈተና መለማመጃ ሲስተም በደህና መጡ።</h1>
+        <p class="author">አዘጋጅ፡ በረከት ቀናው</p>
+        <div class="main-buttons">
+            <button class="btn-primary" onclick="navigateTo('login-choice')">ይግቡ</button>
+            <button class="btn-qr" onclick="openGlobalScanner()">QR ኮድ ስካን ማድረጊያ</button>
+        </div>
+    </section>
+
+    <section id="login-choice" class="screen">
+        <h2>ሚናዎን ይምረጡ</h2>
+        <button class="btn-choice" onclick="enterAsStudent()">ተማሪ</button>
+        <button class="btn-choice admin-btn" onclick="askAdminPassword()">Admin</button>
+        <p class="back" onclick="navigateTo('welcome-page')">ተመለስ</p>
+    </section>
+
+    <section id="field-page" class="screen">
+        <h2>የትምህርት ዘርፍ ይምረጡ</h2>
+        <div class="grid">
+            <button class="field-card" onclick="showSubjects('natural')">Natural Science</button>
+            <button class="field-card" onclick="showSubjects('social')">Social Science</button>
+        </div>
+        <p class="back" onclick="navigateTo('login-choice')">ተመለስ</p>
+    </section>
+
+    <section id="subject-page" class="screen">
+        <h2 id="field-title">ትምህርቶች</h2>
+        <div id="subjects-container" class="grid"></div>
+        <p class="back" onclick="navigateTo('field-page')">ተመለስ</p>
+    </section>
+
+    <section id="exam-page" class="screen">
+        <div class="exam-header">
+            <div id="timer-display">ጊዜ: 01:00:00</div>
+            <div id="q-status">ጥያቄ 1</div>
+        </div>
+        <div class="question-box">
+            <p id="q-text"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="exam-nav">
+            <button id="prev-btn" onclick="movePrev()">ወደኋላ</button>
+            <button id="next-btn" onclick="moveNext()">ቀጣይ</button>
+        </div>
+    </section>
+
+    <section id="result-page" class="screen">
+        <h2>የፈተና ውጤት</h2>
+        <h1 id="score-text">0/0</h1>
+        <div id="corrections"></div>
+        <button class="btn-primary" onclick="location.reload()">እንደገና ጀምር</button>
+    </section>
+
+    <section id="admin-page" class="screen">
+        <h2>Admin - ጥያቄ መጫኛ</h2>
+        <textarea id="bulk-input" placeholder="ከ PDF ኮፒ ያደረጉትን እዚህ ይለጥፉ..."></textarea>
+        <button class="btn-primary" onclick="processBulk()">ጥያቄዎቹን ጫን</button>
+        <div class="ocr-box">
+            <label>ፎቶ አንስተህ ለመጫን፡</label>
+            <input type="file" accept="image/*" capture="camera" onchange="handleOCR()">
+        </div>
+        <p class="back" onclick="navigateTo('welcome-page')">ውጣ</p>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
