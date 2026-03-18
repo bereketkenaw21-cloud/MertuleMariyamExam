@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -58,6 +59,14 @@
         <div class="admin-upload-container">
             <textarea id="bulk-input" placeholder="ከ PDF ኮፒ ያደረጉትን ጥያቄዎች እዚህ ይለጥፉ..."></textarea>
             <button class="btn-primary" onclick="processBulk()">ጥያቄዎቹን ጫን</button>
+            
+            <button class="btn-qr" style="background: #28a745; margin-top: 10px;" onclick="generateQR()">ለተማሪዎች በ QR አጋራ</button>
+            
+            <div id="qrcode-container" style="margin-top:20px; background:white; padding:15px; display:none; border-radius:10px; border: 2px solid #ddd;">
+                <div id="qrcode" style="display: flex; justify-content: center;"></div>
+                <p style="color:black; font-size:13px; margin-top:10px; font-weight:bold;">ተማሪዎች ይህንን ስካን አድርገው ጥያቄውን እንዲቀበሉ ይንገሯቸው</p>
+            </div>
+
             <div class="divider">ወይም</div>
             <div class="ocr-box">
                 <label for="image-input" class="btn-qr">📷 ፎቶ አንስተህ ጫን</label>
