@@ -1,27 +1,40 @@
+// --- የቀድሞው መሠረታዊ ተለዋዋጮች ---
 const ADMIN_PASS = "Mertule Mariyam@2026";
 let questions = [];
 let currentIdx = 0;
 let userAnswers = {};
 let timer;
-let timeLeft = 3600; // 1 ሰዓት
+let timeLeft = 3600;
+let isAdminMode = false; // አድሚን መሆኑን መለያ
+let selectedSubj = "";   // የተመረጠው ሳብጀክት
 
 const subIcons = {
     'English': '📖', 'Maths': '📐', 'Physics': '🔬', 'Chemistry': '🧪', 'IT': '💻',
     'Geography': '🌍', 'History': '🏛️', 'Economics': '📊'
 };
 
+// --- ገጽ መቀያየሪያ ---
 function navigateTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
 
+// --- የአድሚንና ተማሪ መግቢያ ---
 function askAdminPassword() {
-    if (prompt("የአድሚን ፓስወርድ ያስገቡ:") === ADMIN_PASS) navigateTo('admin-page');
-    else alert("ስህተት!");
+    if (prompt("የአድሚን ፓስወርድ ያስገቡ:") === ADMIN_PASS) {
+        isAdminMode = true;
+        navigateTo('field-page');
+    } else {
+        alert("ስህተት!");
+    }
 }
 
-function enterAsStudent() { navigateTo('field-page'); }
+function enterAsStudent() {
+    isAdminMode = false;
+    navigateTo('field-page');
+}
 
+// --- ሳብጀክት ማሳያ (አድሚን ከሆነ ወደ መጫኛ፣ ተማሪ ከሆነ ወደ ፈተና) ---
 function showSubjects(field) {
     const container = document.getElementById('subjects-container');
     container.innerHTML = "";
@@ -33,15 +46,33 @@ function showSubjects(field) {
         const btn = document.createElement('div');
         btn.className = "subject-card";
         btn.innerHTML = `<span class="subj-icon">${subIcons[s]}</span>${s}`;
-        btn.onclick = () => startExam(s);
+        btn.onclick = () => handleSubjectSelection(s);
         container.appendChild(btn);
     });
     navigateTo('subject-page');
 }
 
+function handleSubjectSelection(subj) {
+    selectedSubj = subj;
+    if (isAdminMode) {
+        document.getElementById('admin-sub-title').innerText = subj + " ጥያቄ መጫኛ";
+        navigateTo('admin-page');
+    } else {
+        startExam(subj);
+    }
+}
+
+// --- ፈተና መጀመሪያ ---
 function startExam(subj) {
-    // ናሙና ጥያቄ (በኋላ በአድሚን የሚተካ)
-    questions = [{q: "ናሙና ጥያቄ 1", a: "መልስ A", b: "መልስ B", c: "መልስ C", d: "መልስ D", r: "A"}];
+    // ከ LocalStorage ጥያቄዎችን መፈለግ
+    const stored = localStorage.getItem('exam_' + subj);
+    if (stored) {
+        questions = JSON.parse(stored);
+    } else {
+        // ጥያቄ ከሌለ ናሙና ማሳያ
+        questions = [{q: subj + " ጥያቄ አልተጫነም!", a: "-", b: "-", c: "-", d: "-", r: "A"}];
+    }
+    
     currentIdx = 0;
     userAnswers = {};
     timeLeft = 3600;
@@ -50,6 +81,7 @@ function startExam(subj) {
     navigateTo('exam-page');
 }
 
+// --- ጥያቄ ማሳያ ---
 function showQuestion() {
     const q = questions[currentIdx];
     document.getElementById('q-text').innerText = q.q;
@@ -75,6 +107,7 @@ function moveNext() {
 
 function movePrev() { if (currentIdx > 0) { currentIdx--; showQuestion(); } }
 
+// --- ሰዓት ቆጣሪ ---
 function startTimer() {
     if (timer) clearInterval(timer);
     timer = setInterval(() => {
@@ -86,6 +119,7 @@ function startTimer() {
     }, 1000);
 }
 
+// --- ውጤት ማሳያ ---
 function finishExam() {
     clearInterval(timer);
     let score = 0;
@@ -94,6 +128,44 @@ function finishExam() {
     navigateTo('result-page');
 }
 
-function processBulk() { alert("ጥያቄዎቹ በቅደም ተከተል ተጭነዋል!"); }
-function handleOCR() { alert("ፎቶው ወደ ጥያቄነት እየተቀየረ ነው..."); }
-function openGlobalScanner() { alert("QR ስካነር ይከፈታል..."); }
+// --- አድሚን፡ ጥያቄዎችን ከ PDF ተረድቶ መጫኛ (Regex Parser) ---
+function processBulk() {
+    const rawText = document.getElementById('bulk-input').value;
+    if (!rawText) return alert("እባክዎ ጥያቄዎቹን ያስገቡ!");
+
+    // በቀላሉ ጥያቄዎችን ለመለየት የሚረዳ ኮድ (ቁጥር 1. ብሎ የሚጀምር)
+    const qBlocks = rawText.split(/\d+\./).filter(b => b.trim() !== "");
+    const parsed = qBlocks.map(block => {
+        const lines = block.split('\n').filter(l => l.trim() !== "");
+        return {
+            q: lines[0].trim(),
+            a: lines[1] ? lines[1].replace(/A[.\)]/i, "").trim() : "",
+            b: lines[2] ? lines[2].replace(/B[.\)]/i, "").trim() : "",
+            c: lines[3] ? lines[3].replace(/C[.\)]/i, "").trim() : "",
+            d: lines[4] ? lines[4].replace(/D[.\)]/i, "").trim() : "",
+            r: "A" // አድሚኑ በኋላ እንዲያስተካክለው የሚተው
+        };
+    });
+
+    localStorage.setItem('exam_' + selectedSubj, JSON.stringify(parsed));
+    alert(parsed.length + " ጥያቄዎች ለ " + selectedSubj + " ተጭነዋል!");
+}
+
+// --- QR ኮድ ስካነር (ከአድሚን ጥያቄ ለመቀበል) ---
+function openGlobalScanner() {
+    navigateTo('qr-scanner-page');
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+            const data = JSON.parse(decodedText);
+            localStorage.setItem('exam_' + data.subj, JSON.stringify(data.qs));
+            alert(data.subj + " ጥያቄዎች ደርሰዋል!");
+            html5QrCode.stop();
+            navigateTo('welcome-page');
+        }
+    );
+}
+
+function handleOCR() { alert("የፎቶ ማንበቢያ (OCR) ሲስተም በቅርቡ ይጨመራል!"); }
