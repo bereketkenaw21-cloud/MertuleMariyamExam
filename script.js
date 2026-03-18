@@ -1,4 +1,13 @@
-// --- የቀድሞው መሠረታዊ ተለዋዋጮች (ምንም አልተቀነሰም) ---
+// 1. መጀመሪያ፡ አፑ ያለ ዳታ (Offline) እንዲሰራ Service Worker መመዝገብ
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.log('Service Worker ተመዝግቧል!'))
+            .catch(err => console.log('Service Worker ስህተት፡', err));
+    });
+}
+
+// --- የቀድሞው መሠረታዊ ተለዋዋጮች ---
 const ADMIN_PASS = "Mertule Mariyam@2026";
 let questions = [];
 let currentIdx = 0;
@@ -17,14 +26,20 @@ const subIcons = {
 function navigateTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    
+    // ወደ QR ገጽ ስንሄድ ስካነሩን በራሱ እንዲቀሰቅስ
+    if (id === 'qr-scanner-page') {
+        startOfflineScanner();
+    }
 }
 
 // --- የአድሚንና ተማሪ መግቢያ ---
 function askAdminPassword() {
-    if (prompt("የአድሚን ፓስወርድ ያስገቡ:") === ADMIN_PASS) {
+    let pass = prompt("የአድሚን ፓስወርድ ያስገቡ:");
+    if (pass === ADMIN_PASS) {
         isAdminMode = true;
         navigateTo('field-page');
-    } else {
+    } else if (pass !== null) {
         alert("ስህተት!");
     }
 }
@@ -52,12 +67,10 @@ function showSubjects(field) {
     navigateTo('subject-page');
 }
 
-// --- የሳብጀክት ምርጫ ሎጂክ ---
 function handleSubjectSelection(subj) {
     selectedSubj = subj;
     if (isAdminMode) {
         document.getElementById('admin-sub-title').innerText = subj + " ጥያቄ መጫኛ";
-        // አዲስ፡ አድሚኑ ገጹን ሲቀይር የቆየ QR ኮድ ካለ እንዲጠፋ
         if(document.getElementById('qrcode-container')) {
             document.getElementById('qrcode-container').style.display = 'none';
         }
@@ -73,7 +86,7 @@ function startExam(subj) {
     if (stored) {
         questions = JSON.parse(stored);
     } else {
-        questions = [{q: subj + " ጥያቄ አልተጫነም!", a: "-", b: "-", c: "-", d: "-", r: "A"}];
+        questions = [{q: subj + " ጥያቄ አልተጫነም!", a: "መረጃ የለም", b: "-", c: "-", d: "-", r: "A"}];
     }
     
     currentIdx = 0;
@@ -84,7 +97,6 @@ function startExam(subj) {
     navigateTo('exam-page');
 }
 
-// --- ጥያቄ ማሳያ ---
 function showQuestion() {
     const q = questions[currentIdx];
     document.getElementById('q-text').innerText = q.q;
@@ -96,7 +108,7 @@ function showQuestion() {
         onclick="selectOpt('${opt.toUpperCase()}')">${opt.toUpperCase()}. ${q[opt]}</button>
     `).join('');
 
-    document.getElementById('prev-btn').style.visibility = (currentIdx > 0 && currentIdx < 3) ? "visible" : "hidden";
+    document.getElementById('prev-btn').style.visibility = (currentIdx > 0) ? "visible" : "hidden";
 }
 
 function selectOpt(opt) { userAnswers[currentIdx] = opt; showQuestion(); }
@@ -109,7 +121,6 @@ function moveNext() {
 
 function movePrev() { if (currentIdx > 0) { currentIdx--; showQuestion(); } }
 
-// --- ሰዓት ቆጣሪ ---
 function startTimer() {
     if (timer) clearInterval(timer);
     timer = setInterval(() => {
@@ -121,7 +132,6 @@ function startTimer() {
     }, 1000);
 }
 
-// --- ውጤት ማሳያ ---
 function finishExam() {
     clearInterval(timer);
     let score = 0;
@@ -152,7 +162,7 @@ function processBulk() {
     alert(parsed.length + " ጥያቄዎች ለ " + selectedSubj + " ተጭነዋል!");
 }
 
-// --- አዲስ፡ QR ኮድ ማመንጫ (መላላኪያ) ---
+// --- QR ኮድ ማመንጫ (መላላኪያ) ---
 function generateQR() {
     const storedQs = localStorage.getItem('exam_' + selectedSubj);
     if (!storedQs) return alert("መጀመሪያ ጥያቄ መጫን አለብህ!");
@@ -160,7 +170,7 @@ function generateQR() {
     const qrContainer = document.getElementById('qrcode-container');
     const qrDiv = document.getElementById('qrcode');
     
-    qrDiv.innerHTML = ""; // አሮጌውን ለማጽዳት
+    qrDiv.innerHTML = ""; 
     qrContainer.style.display = "block";
 
     const shareData = JSON.stringify({
@@ -168,37 +178,36 @@ function generateQR() {
         qs: JSON.parse(storedQs)
     });
 
-    // QR ኮድ መፍጠሪያ (በ index.html ላይ የታከለው ላይብረሪ ያስፈልጋል)
+    // በ qrcode.min.js ላይብረሪ ተጠቅሞ QR ይፈጥራል
     new QRCode(qrDiv, {
         text: shareData,
         width: 200,
-        height: 200,
-        colorDark : "#000000",
-        colorLight : "#ffffff"
+        height: 200
     });
-    
-    alert(selectedSubj + " ጥያቄዎችን ለማጋራት QR ተዘጋጅቷል!");
 }
 
-// --- QR ኮድ ስካነር ---
-function openGlobalScanner() {
-    navigateTo('qr-scanner-page');
+// --- አዲስ፡ ኦፍላይን QR ስካነር ሎጂክ ---
+function startOfflineScanner() {
     const html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
     html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        config,
         (decodedText) => {
             try {
                 const data = JSON.parse(decodedText);
                 localStorage.setItem('exam_' + data.subj, JSON.stringify(data.qs));
-                alert(data.subj + " ጥያቄዎች ደርሰዋል!");
+                alert(data.subj + " ጥያቄዎች በስኬት ደርሰዋል!");
                 html5QrCode.stop();
                 navigateTo('welcome-page');
             } catch(e) {
                 alert("የተሳሳተ QR ኮድ ነው!");
             }
         }
-    );
+    ).catch(err => {
+        console.error("ካሜራ መክፈት አልተቻለም፦", err);
+    });
 }
 
 function handleOCR() { alert("የፎቶ ማንበቢያ (OCR) ሲስተም በቅርቡ ይጨመራል!"); }
