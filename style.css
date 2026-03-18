@@ -1,8 +1,17 @@
-body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
-.screen { display: none; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; }
+/* የቀድሞው መሠረታዊ ዲዛይን */
+body { margin: 0; font-family: sans-serif; background: #f0f2f5; overflow-x: hidden; }
+.screen { display: none; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; background-size: 400% 400%; animation: bgGradient 15s ease infinite; }
 .screen.active { display: flex; }
 
-/* Slide Show Animation */
+/* አዲስ፡ የሚንቀሳቀስ የጀርባ ቀለም (Background Gradient) */
+@keyframes bgGradient {
+    0% { background-color: #f0f2f5; }
+    33% { background-color: #e8f0fe; }
+    66% { background-color: #fce8e6; }
+    100% { background-color: #f0f2f5; }
+}
+
+/* የቀድሞው Slide Show Animation */
 .slideshow {
     font-size: 24px;
     animation: colorChange 8s infinite;
@@ -11,17 +20,51 @@ body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
     0% { color: #1a73e8; } 25% { color: #34a853; } 50% { color: #ea4335; } 75% { color: #fbbc05; } 100% { color: #1a73e8; }
 }
 
-.author { font-weight: bold; font-size: 18px; margin-top: 10px; }
-button { padding: 15px; margin: 10px; border-radius: 10px; border: none; cursor: pointer; width: 80%; max-width: 300px; font-size: 16px; }
+/* አዲስ፡ ትናንሽ ጽሁፎች እስላይድ ሾው */
+.slideshow-small { font-size: 20px; animation: colorChange 10s infinite; margin-bottom: 20px; }
+
+.author { font-weight: bold; font-size: 18px; margin-top: 10px; color: #5f6368; }
+
+/* አዝራሮች (Buttons) */
+button { padding: 15px; margin: 10px; border-radius: 12px; border: none; cursor: pointer; width: 80%; max-width: 300px; font-size: 16px; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+button:active { transform: scale(0.95); }
+
 .btn-primary { background: #1a73e8; color: white; }
 .btn-qr { background: #5f6368; color: white; }
 .admin-btn { background: #ea4335; color: white; }
+.student-btn { background: #34a853; color: white; }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.subject-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-.subj-icon { font-size: 30px; display: block; margin-bottom: 5px; }
+/* የዘርፍ ምርጫ ካርዶች (Field Cards) */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 400px; }
+.field-card { height: 120px; border-radius: 15px; color: white; font-weight: bold; border: none; width: 100%; }
+.natural-gradient { background: linear-gradient(135deg, #1a73e8, #34a853); }
+.social-gradient { background: linear-gradient(135deg, #fbbc05, #ea4335); }
+.icon-large { font-size: 40px; }
 
-.exam-header { display: flex; justify-content: space-between; width: 100%; color: red; font-weight: bold; margin-bottom: 10px; }
-.option-btn { background: white; border: 2px solid #ddd; text-align: left; margin: 5px 0; width: 100%; }
-.option-btn.selected { border-color: #1a73e8; background: #e8f0fe; }
-.hidden { display: none; }
+/* የሳብጀክት ዝርዝር (Subject Grid) */
+.grid-subjects { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 450px; }
+.subject-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.3s; color: #333; cursor: pointer; }
+.subject-card:hover { border-color: #1a73e8; transform: translateY(-5px); }
+
+/* የፈተና ገጽ ዲዛይን */
+.exam-header { display: flex; justify-content: space-between; width: 100%; color: #ea4335; font-weight: bold; margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 10px; }
+.question-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; }
+.q-style { font-size: 18px; font-weight: bold; color: #202124; margin-bottom: 20px; }
+.option-btn { background: #f8f9fa; border: 2px solid #eee; text-align: left; margin: 8px 0; width: 100%; color: #3c4043; padding: 12px; }
+.option-btn.selected { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
+
+/* የውጤት ገጽ (Score Circle) */
+.score-circle { width: 150px; height: 150px; border-radius: 50%; border: 8px solid #34a853; display: flex; align-items: center; justify-content: center; margin: 20px auto; background: white; box-shadow: 0 0 20px rgba(52, 168, 83, 0.2); }
+#score-text { font-size: 32px; color: #34a853; }
+
+/* Animations */
+.fade-in { animation: fadeIn 1s ease-in; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.back { margin-top: 20px; color: #5f6368; text-decoration: underline; cursor: pointer; font-weight: bold; }
+.hidden { display: none !important; }
+
+/* Admin Section */
+.admin-upload-container { width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+#bulk-input { width: 100%; height: 150px; border-radius: 10px; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; font-family: inherit; }
+.divider { margin: 15px 0; color: #999; font-size: 14px; font-weight: bold; }
