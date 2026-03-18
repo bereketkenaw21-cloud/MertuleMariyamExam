@@ -32,7 +32,7 @@
                 <span class="btn-icon">🔐</span> Admin
             </button>
         </div>
-        <p class="back" onclick="navigateTo('welcome-page')">ወደኋላ ተመለስ</p>
+        <p class="back" onclick="navigateTo('welcome-page')">⬅️ ወደ መጀመሪያ ተመለስ</p>
     </section>
 
     <section id="field-page" class="screen">
@@ -45,24 +45,24 @@
                 <span class="icon-large">🌍</span><br>Social Science
             </button>
         </div>
-        <p class="back" onclick="goBackFromField()">ተመለስ</p>
+        <p class="back" onclick="goBackFromField()">⬅️ ወደ ኋላ ተመለስ</p>
     </section>
 
     <section id="subject-page" class="screen">
         <h2 id="field-title" class="fade-in">ትምህርቶች</h2>
         <div id="subjects-container" class="grid-subjects"></div>
-        <p class="back" onclick="navigateTo('field-page')">ተመለስ</p>
+        <p class="back" onclick="navigateTo('field-page')">⬅️ ወደ ዘርፍ ምርጫ ተመለስ</p>
     </section>
 
     <section id="admin-page" class="screen">
         <h2 id="admin-sub-title">ጥያቄ መጫኛ</h2>
         <div class="admin-upload-container">
             <textarea id="bulk-input" placeholder="ከ PDF ኮፒ ያደረጉትን ጥያቄዎች እዚህ ይለጥፉ..."></textarea>
-            <button class="btn-primary" onclick="processBulk()">ጥያቄዎቹን ጫን</button>
+            <button class="btn-primary" onclick="processBulk()">📥 ጥያቄዎቹን ጫን</button>
             
-            <button class="btn-qr" style="background: #28a745; margin-top: 10px;" onclick="generateQR()">ለተማሪዎች በ QR አጋራ</button>
+            <button class="btn-qr" style="background: #28a745; margin-top: 10px; width: 80%;" onclick="generateQR()">📤 ለተማሪዎች በ QR አጋራ</button>
             
-            <div id="qrcode-container" style="margin-top:20px; background:white; padding:15px; display:none; border-radius:10px; border: 2px solid #ddd;">
+            <div id="qrcode-container" style="margin-top:20px; background:white; padding:15px; display:none; border-radius:10px; border: 2px solid #ddd; width: 90%;">
                 <div id="qrcode" style="display: flex; justify-content: center;"></div>
                 <p style="color:black; font-size:13px; margin-top:10px; font-weight:bold;">ተማሪዎች ይህንን ስካን አድርገው ጥያቄውን እንዲቀበሉ ይንገሯቸው</p>
             </div>
@@ -73,7 +73,7 @@
                 <input type="file" id="image-input" accept="image/*" capture="camera" onchange="handleOCR()" style="display:none">
             </div>
         </div>
-        <p class="back" onclick="navigateTo('subject-page')">ተመለስ</p>
+        <p class="back" onclick="navigateTo('subject-page')">⬅️ ወደ ሳብጀክት ምርጫ ተመለስ</p>
     </section>
 
     <section id="exam-page" class="screen">
@@ -98,13 +98,13 @@
             <h1 id="score-text">0/0</h1>
         </div>
         <div id="corrections" class="corrections-container"></div>
-        <button class="btn-primary" onclick="location.reload()">ወደ መጀመሪያ ተመለስ</button>
+        <button class="btn-primary" onclick="location.reload()">🔄 ወደ መጀመሪያ ተመለስ</button>
     </section>
 
     <section id="qr-scanner-page" class="screen">
         <h2>ጥያቄ ለመቀበል ስካን ያድርጉ</h2>
         <div id="reader" style="width: 100%; border-radius: 15px; overflow: hidden;"></div>
-        <p class="back" onclick="navigateTo('welcome-page')">ተመለስ</p>
+        <p class="back" onclick="navigateTo('welcome-page')">⬅️ ተመለስ</p>
     </section>
 
     <script src="script.js"></script>
