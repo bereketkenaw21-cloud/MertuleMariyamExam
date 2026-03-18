@@ -11,34 +11,60 @@
 <body>
 
     <section id="welcome-page" class="screen active">
-        <h1 class="slideshow">እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የብሔራዊ ፈተና መለማመጃ ሲስተም በደህና መጡ።</h1>
-        <p class="author">አዘጋጅ፡ በረከት ቀናው</p>
-        <div class="main-buttons">
-            <button class="btn-primary" onclick="navigateTo('login-choice')">ይግቡ</button>
-            <button class="btn-qr" onclick="openGlobalScanner()">QR ኮድ ስካን ማድረጊያ</button>
+        <div class="overlay">
+            <h1 class="slideshow">እንኳን ወደ መርጡለ ማሪያም 2ኛ ደረጃ ትምህርት ቤት የብሔራዊ ፈተና መለማመጃ ሲስተም በደህና መጡ።</h1>
+            <p class="author">አዘጋጅ፡ በረከት ቀናው</p>
+            <div class="main-buttons">
+                <button class="btn-primary ripple" onclick="navigateTo('login-choice')">ይግቡ</button>
+                <button class="btn-qr" onclick="navigateTo('qr-scanner-page')">በ QR ኮድ ጥያቄ ተቀበል</button>
+            </div>
         </div>
     </section>
 
     <section id="login-choice" class="screen">
-        <h2>ሚናዎን ይምረጡ</h2>
-        <button class="btn-choice" onclick="enterAsStudent()">ተማሪ</button>
-        <button class="btn-choice admin-btn" onclick="askAdminPassword()">Admin</button>
-        <p class="back" onclick="navigateTo('welcome-page')">ተመለስ</p>
+        <h2 class="fade-in">ማንነትዎን ይምረጡ</h2>
+        <div class="role-container">
+            <button class="btn-choice student-btn" onclick="enterAsStudent()">
+                <span class="btn-icon">👨‍🎓</span> ተማሪ
+            </button>
+            <button class="btn-choice admin-btn" onclick="askAdminPassword()">
+                <span class="btn-icon">🔐</span> Admin
+            </button>
+        </div>
+        <p class="back" onclick="navigateTo('welcome-page')">ወደኋላ ተመለስ</p>
     </section>
 
     <section id="field-page" class="screen">
-        <h2>የትምህርት ዘርፍ ይምረጡ</h2>
+        <h2 class="slideshow-small">የትምህርት ዘርፍ ይምረጡ</h2>
         <div class="grid">
-            <button class="field-card" onclick="showSubjects('natural')">Natural Science</button>
-            <button class="field-card" onclick="showSubjects('social')">Social Science</button>
+            <button class="field-card natural-gradient" onclick="showSubjects('natural')">
+                <span class="icon-large">🔬</span><br>Natural Science
+            </button>
+            <button class="field-card social-gradient" onclick="showSubjects('social')">
+                <span class="icon-large">🌍</span><br>Social Science
+            </button>
         </div>
-        <p class="back" onclick="navigateTo('login-choice')">ተመለስ</p>
+        <p class="back" onclick="goBackFromField()">ተመለስ</p>
     </section>
 
     <section id="subject-page" class="screen">
-        <h2 id="field-title">ትምህርቶች</h2>
-        <div id="subjects-container" class="grid"></div>
+        <h2 id="field-title" class="fade-in">ትምህርቶች</h2>
+        <div id="subjects-container" class="grid-subjects"></div>
         <p class="back" onclick="navigateTo('field-page')">ተመለስ</p>
+    </section>
+
+    <section id="admin-page" class="screen">
+        <h2 id="admin-sub-title">ጥያቄ መጫኛ</h2>
+        <div class="admin-upload-container">
+            <textarea id="bulk-input" placeholder="ከ PDF ኮፒ ያደረጉትን ጥያቄዎች እዚህ ይለጥፉ..."></textarea>
+            <button class="btn-primary" onclick="processBulk()">ጥያቄዎቹን ጫን</button>
+            <div class="divider">ወይም</div>
+            <div class="ocr-box">
+                <label for="image-input" class="btn-qr">📷 ፎቶ አንስተህ ጫን</label>
+                <input type="file" id="image-input" accept="image/*" capture="camera" onchange="handleOCR()" style="display:none">
+            </div>
+        </div>
+        <p class="back" onclick="navigateTo('subject-page')">ተመለስ</p>
     </section>
 
     <section id="exam-page" class="screen">
@@ -47,31 +73,29 @@
             <div id="q-status">ጥያቄ 1</div>
         </div>
         <div class="question-box">
-            <p id="q-text"></p>
+            <p id="q-text" class="q-style"></p>
             <div id="options-container"></div>
         </div>
         <div class="exam-nav">
-            <button id="prev-btn" onclick="movePrev()">ወደኋላ</button>
-            <button id="next-btn" onclick="moveNext()">ቀጣይ</button>
+            <button id="prev-btn" class="nav-btn" onclick="movePrev()">ወደኋላ</button>
+            <button id="next-btn" class="nav-btn" onclick="moveNext()">ቀጣይ</button>
+            <button id="submit-btn" class="btn-primary hidden" onclick="finishExam()">ፈተናውን ጨርስ</button>
         </div>
     </section>
 
     <section id="result-page" class="screen">
-        <h2>የፈተና ውጤት</h2>
-        <h1 id="score-text">0/0</h1>
-        <div id="corrections"></div>
-        <button class="btn-primary" onclick="location.reload()">እንደገና ጀምር</button>
+        <h2 class="fade-in">የፈተና ውጤት</h2>
+        <div class="score-circle">
+            <h1 id="score-text">0/0</h1>
+        </div>
+        <div id="corrections" class="corrections-container"></div>
+        <button class="btn-primary" onclick="location.reload()">ወደ መጀመሪያ ተመለስ</button>
     </section>
 
-    <section id="admin-page" class="screen">
-        <h2>Admin - ጥያቄ መጫኛ</h2>
-        <textarea id="bulk-input" placeholder="ከ PDF ኮፒ ያደረጉትን እዚህ ይለጥፉ..."></textarea>
-        <button class="btn-primary" onclick="processBulk()">ጥያቄዎቹን ጫን</button>
-        <div class="ocr-box">
-            <label>ፎቶ አንስተህ ለመጫን፡</label>
-            <input type="file" accept="image/*" capture="camera" onchange="handleOCR()">
-        </div>
-        <p class="back" onclick="navigateTo('welcome-page')">ውጣ</p>
+    <section id="qr-scanner-page" class="screen">
+        <h2>ጥያቄ ለመቀበል ስካን ያድርጉ</h2>
+        <div id="reader" style="width: 100%; border-radius: 15px; overflow: hidden;"></div>
+        <p class="back" onclick="navigateTo('welcome-page')">ተመለስ</p>
     </section>
 
     <script src="script.js"></script>
