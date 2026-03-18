@@ -1,12 +1,12 @@
-// --- የቀድሞው መሠረታዊ ተለዋዋጮች ---
+// --- የቀድሞው መሠረታዊ ተለዋዋጮች (ምንም አልተቀነሰም) ---
 const ADMIN_PASS = "Mertule Mariyam@2026";
 let questions = [];
 let currentIdx = 0;
 let userAnswers = {};
 let timer;
 let timeLeft = 3600;
-let isAdminMode = false; // አድሚን መሆኑን መለያ
-let selectedSubj = "";   // የተመረጠው ሳብጀክት
+let isAdminMode = false; 
+let selectedSubj = "";   
 
 const subIcons = {
     'English': '📖', 'Maths': '📐', 'Physics': '🔬', 'Chemistry': '🧪', 'IT': '💻',
@@ -19,11 +19,11 @@ function navigateTo(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// --- የአድሚንና ተማሪ መግቢያ ---
+// --- የአድሚንና ተማሪ መግቢያ (አድሚንም አሁን ወደ field-page ይሄዳል) ---
 function askAdminPassword() {
     if (prompt("የአድሚን ፓስወርድ ያስገቡ:") === ADMIN_PASS) {
-        isAdminMode = true;
-        navigateTo('field-page');
+        isAdminMode = true; // አድሚን መሆኑን መለየት
+        navigateTo('field-page'); // አድሚኑም መጀመሪያ ዘርፍ እንዲመርጥ
     } else {
         alert("ስህተት!");
     }
@@ -34,11 +34,11 @@ function enterAsStudent() {
     navigateTo('field-page');
 }
 
-// --- ሳብጀክት ማሳያ (አድሚን ከሆነ ወደ መጫኛ፣ ተማሪ ከሆነ ወደ ፈተና) ---
+// --- ሳብጀክት ማሳያ ---
 function showSubjects(field) {
     const container = document.getElementById('subjects-container');
     container.innerHTML = "";
-    document.getElementById('field-title').innerText = field === 'natural' ? "Natural Science" : "Social Science";
+    document.getElementById('field-title').innerText = (field === 'natural' ? "Natural Science" : "Social Science") + (isAdminMode ? " - Admin" : "");
     
     const list = field === 'natural' ? ['English', 'Maths', 'Physics', 'Chemistry', 'IT'] : ['English', 'Maths', 'Geography', 'History', 'Economics'];
     
@@ -52,24 +52,25 @@ function showSubjects(field) {
     navigateTo('subject-page');
 }
 
+// --- የሳብጀክት ምርጫ ሎጂክ (አድሚን ከሆነ ወደ መጫኛ፣ ተማሪ ከሆነ ወደ ፈተና) ---
 function handleSubjectSelection(subj) {
     selectedSubj = subj;
     if (isAdminMode) {
+        // አድሚን ከሆነ ወደ ጥያቄ መጫኛ ገጽ ይሄዳል
         document.getElementById('admin-sub-title').innerText = subj + " ጥያቄ መጫኛ";
         navigateTo('admin-page');
     } else {
+        // ተማሪ ከሆነ ወደ ፈተናው ይሄዳል
         startExam(subj);
     }
 }
 
 // --- ፈተና መጀመሪያ ---
 function startExam(subj) {
-    // ከ LocalStorage ጥያቄዎችን መፈለግ
     const stored = localStorage.getItem('exam_' + subj);
     if (stored) {
         questions = JSON.parse(stored);
     } else {
-        // ጥያቄ ከሌለ ናሙና ማሳያ
         questions = [{q: subj + " ጥያቄ አልተጫነም!", a: "-", b: "-", c: "-", d: "-", r: "A"}];
     }
     
@@ -128,30 +129,30 @@ function finishExam() {
     navigateTo('result-page');
 }
 
-// --- አድሚን፡ ጥያቄዎችን ከ PDF ተረድቶ መጫኛ (Regex Parser) ---
+// --- አድሚን፡ ጥያቄዎችን ከ PDF ተረድቶ መጫኛ ---
 function processBulk() {
     const rawText = document.getElementById('bulk-input').value;
     if (!rawText) return alert("እባክዎ ጥያቄዎቹን ያስገቡ!");
 
-    // በቀላሉ ጥያቄዎችን ለመለየት የሚረዳ ኮድ (ቁጥር 1. ብሎ የሚጀምር)
     const qBlocks = rawText.split(/\d+\./).filter(b => b.trim() !== "");
     const parsed = qBlocks.map(block => {
         const lines = block.split('\n').filter(l => l.trim() !== "");
         return {
-            q: lines[0].trim(),
+            q: lines[0] ? lines[0].trim() : "ጥያቄ የለም",
             a: lines[1] ? lines[1].replace(/A[.\)]/i, "").trim() : "",
             b: lines[2] ? lines[2].replace(/B[.\)]/i, "").trim() : "",
             c: lines[3] ? lines[3].replace(/C[.\)]/i, "").trim() : "",
             d: lines[4] ? lines[4].replace(/D[.\)]/i, "").trim() : "",
-            r: "A" // አድሚኑ በኋላ እንዲያስተካክለው የሚተው
+            r: "A" 
         };
     });
 
     localStorage.setItem('exam_' + selectedSubj, JSON.stringify(parsed));
     alert(parsed.length + " ጥያቄዎች ለ " + selectedSubj + " ተጭነዋል!");
+    document.getElementById('bulk-input').value = "";
 }
 
-// --- QR ኮድ ስካነር (ከአድሚን ጥያቄ ለመቀበል) ---
+// --- QR ኮድ ስካነር ---
 function openGlobalScanner() {
     navigateTo('qr-scanner-page');
     const html5QrCode = new Html5Qrcode("reader");
@@ -169,3 +170,9 @@ function openGlobalScanner() {
 }
 
 function handleOCR() { alert("የፎቶ ማንበቢያ (OCR) ሲስተም በቅርቡ ይጨመራል!"); }
+
+// ተጨማሪ ተግባር፡ ወደ ኋላ መመለሻ ለዘርፍ ምርጫ
+function goBackFromField() {
+    isAdminMode = false;
+    navigateTo('login-choice');
+}
