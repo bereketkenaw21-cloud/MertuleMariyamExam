@@ -19,11 +19,11 @@ function navigateTo(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// --- የአድሚንና ተማሪ መግቢያ (አድሚንም አሁን ወደ field-page ይሄዳል) ---
+// --- የአድሚንና ተማሪ መግቢያ ---
 function askAdminPassword() {
     if (prompt("የአድሚን ፓስወርድ ያስገቡ:") === ADMIN_PASS) {
-        isAdminMode = true; // አድሚን መሆኑን መለየት
-        navigateTo('field-page'); // አድሚኑም መጀመሪያ ዘርፍ እንዲመርጥ
+        isAdminMode = true;
+        navigateTo('field-page');
     } else {
         alert("ስህተት!");
     }
@@ -52,15 +52,17 @@ function showSubjects(field) {
     navigateTo('subject-page');
 }
 
-// --- የሳብጀክት ምርጫ ሎጂክ (አድሚን ከሆነ ወደ መጫኛ፣ ተማሪ ከሆነ ወደ ፈተና) ---
+// --- የሳብጀክት ምርጫ ሎጂክ ---
 function handleSubjectSelection(subj) {
     selectedSubj = subj;
     if (isAdminMode) {
-        // አድሚን ከሆነ ወደ ጥያቄ መጫኛ ገጽ ይሄዳል
         document.getElementById('admin-sub-title').innerText = subj + " ጥያቄ መጫኛ";
+        // አዲስ፡ አድሚኑ ገጹን ሲቀይር የቆየ QR ኮድ ካለ እንዲጠፋ
+        if(document.getElementById('qrcode-container')) {
+            document.getElementById('qrcode-container').style.display = 'none';
+        }
         navigateTo('admin-page');
     } else {
-        // ተማሪ ከሆነ ወደ ፈተናው ይሄዳል
         startExam(subj);
     }
 }
@@ -94,7 +96,6 @@ function showQuestion() {
         onclick="selectOpt('${opt.toUpperCase()}')">${opt.toUpperCase()}. ${q[opt]}</button>
     `).join('');
 
-    // ወደኋላ መመለስ ህግ (እስከ 3 ጥያቄ)
     document.getElementById('prev-btn').style.visibility = (currentIdx > 0 && currentIdx < 3) ? "visible" : "hidden";
 }
 
@@ -129,7 +130,7 @@ function finishExam() {
     navigateTo('result-page');
 }
 
-// --- አድሚን፡ ጥያቄዎችን ከ PDF ተረድቶ መጫኛ ---
+// --- አድሚን፡ ጥያቄዎችን መጫኛ ---
 function processBulk() {
     const rawText = document.getElementById('bulk-input').value;
     if (!rawText) return alert("እባክዎ ጥያቄዎቹን ያስገቡ!");
@@ -149,7 +150,34 @@ function processBulk() {
 
     localStorage.setItem('exam_' + selectedSubj, JSON.stringify(parsed));
     alert(parsed.length + " ጥያቄዎች ለ " + selectedSubj + " ተጭነዋል!");
-    document.getElementById('bulk-input').value = "";
+}
+
+// --- አዲስ፡ QR ኮድ ማመንጫ (መላላኪያ) ---
+function generateQR() {
+    const storedQs = localStorage.getItem('exam_' + selectedSubj);
+    if (!storedQs) return alert("መጀመሪያ ጥያቄ መጫን አለብህ!");
+
+    const qrContainer = document.getElementById('qrcode-container');
+    const qrDiv = document.getElementById('qrcode');
+    
+    qrDiv.innerHTML = ""; // አሮጌውን ለማጽዳት
+    qrContainer.style.display = "block";
+
+    const shareData = JSON.stringify({
+        subj: selectedSubj,
+        qs: JSON.parse(storedQs)
+    });
+
+    // QR ኮድ መፍጠሪያ (በ index.html ላይ የታከለው ላይብረሪ ያስፈልጋል)
+    new QRCode(qrDiv, {
+        text: shareData,
+        width: 200,
+        height: 200,
+        colorDark : "#000000",
+        colorLight : "#ffffff"
+    });
+    
+    alert(selectedSubj + " ጥያቄዎችን ለማጋራት QR ተዘጋጅቷል!");
 }
 
 // --- QR ኮድ ስካነር ---
@@ -160,18 +188,21 @@ function openGlobalScanner() {
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
-            const data = JSON.parse(decodedText);
-            localStorage.setItem('exam_' + data.subj, JSON.stringify(data.qs));
-            alert(data.subj + " ጥያቄዎች ደርሰዋል!");
-            html5QrCode.stop();
-            navigateTo('welcome-page');
+            try {
+                const data = JSON.parse(decodedText);
+                localStorage.setItem('exam_' + data.subj, JSON.stringify(data.qs));
+                alert(data.subj + " ጥያቄዎች ደርሰዋል!");
+                html5QrCode.stop();
+                navigateTo('welcome-page');
+            } catch(e) {
+                alert("የተሳሳተ QR ኮድ ነው!");
+            }
         }
     );
 }
 
 function handleOCR() { alert("የፎቶ ማንበቢያ (OCR) ሲስተም በቅርቡ ይጨመራል!"); }
 
-// ተጨማሪ ተግባር፡ ወደ ኋላ መመለሻ ለዘርፍ ምርጫ
 function goBackFromField() {
     isAdminMode = false;
     navigateTo('login-choice');
